@@ -1,0 +1,37 @@
+services:
+  downloader:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8000"
+    environment:
+      APP_NAME: "${APP_NAME:-A TO Z Link Downloader}"
+      APP_ENV: production
+      DATA_DIR: /app/data/jobs
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-localhost,127.0.0.1}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-}"
+      TRUST_PROXY: "true"
+      ENABLE_HSTS: "${ENABLE_HSTS:-false}"
+      MAX_DOWNLOAD_BYTES: "${MAX_DOWNLOAD_BYTES:-1073741824}"
+      MAX_DURATION_SECONDS: "${MAX_DURATION_SECONDS:-10800}"
+      SOCKET_TIMEOUT_SECONDS: "${SOCKET_TIMEOUT_SECONDS:-20}"
+      JOB_TTL_SECONDS: "${JOB_TTL_SECONDS:-3600}"
+      MAX_WORKERS: "${MAX_WORKERS:-2}"
+      ANALYZE_LIMIT_PER_15_MIN: "${ANALYZE_LIMIT_PER_15_MIN:-20}"
+      DOWNLOAD_LIMIT_PER_15_MIN: "${DOWNLOAD_LIMIT_PER_15_MIN:-6}"
+    volumes:
+      - media_jobs:/app/data/jobs
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,uid=10001,gid=10001,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 1536m
+    cpus: 2.0
+
+volumes:
+  media_jobs:
