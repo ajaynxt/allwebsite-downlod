@@ -71,16 +71,19 @@ app = FastAPI(
 )
 
 app.add_middleware(TrustedHostMiddleware, allowed_hosts=list(settings.allowed_hosts))
-if settings.allowed_origins:
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=list(settings.allowed_origins),
-        allow_credentials=False,
-        allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type"],
-        expose_headers=["Content-Disposition", "Content-Length"],
-        max_age=600,
-    )
+
+# Public downloader API: browser clients can come from the GitHub Pages custom
+# domain as well as future AJAYNXT frontends. No cookies/credentials are used,
+# so wildcard CORS is safe here and avoids brittle origin mismatches.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["*"],
+    expose_headers=["Content-Disposition", "Content-Length"],
+    max_age=600,
+)
 
 
 @app.middleware("http")
@@ -236,9 +239,6 @@ async def direct_download(payload: DownloadRequest, request: Request) -> FileRes
     try:
         file_path = await asyncio.shield(preparation)
     except asyncio.CancelledError:
-        # A client can disconnect while yt-dlp is still finishing in its worker
-        # thread. Keep that task alive and delete its private directory as soon
-        # as the worker exits; the startup purge is the final crash-safe guard.
         preparation.add_done_callback(
             lambda _task: shutil.rmtree(request_dir, ignore_errors=True)
         )
