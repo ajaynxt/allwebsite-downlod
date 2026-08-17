@@ -24,9 +24,11 @@ class Settings:
     app_name: str = os.getenv("APP_NAME", "A TO Z Link Downloader")
     environment: str = os.getenv("APP_ENV", "development")
     public_base_url: str = os.getenv(
-        "PUBLIC_BASE_URL", "https://download.ajaynxt.com"
+        "PUBLIC_BASE_URL", "https://allwebsite-downlod.onrender.com"
     ).rstrip("/")
-    frontend_api_base_url: str = os.getenv("FRONTEND_API_BASE_URL", "").rstrip("/")
+    frontend_api_base_url: str = os.getenv(
+        "FRONTEND_API_BASE_URL", "https://allwebsite-downlod.onrender.com"
+    ).rstrip("/")
     owner_name: str = os.getenv("OWNER_NAME", "AJAYNXT")
     contact_email: str = os.getenv("CONTACT_EMAIL", "ajayx3neha@gmail.com")
     support_upi_id: str = os.getenv("SUPPORT_UPI_ID", "9929562585@ybl").strip()
@@ -51,16 +53,22 @@ class Settings:
     download_limit: int = _int_env("DOWNLOAD_LIMIT_PER_15_MIN", 6, 1, 100)
     allowed_origins: tuple[str, ...] = tuple(
         origin.strip()
-        for origin in os.getenv("ALLOWED_ORIGINS", "").split(",")
+        for origin in os.getenv(
+            "ALLOWED_ORIGINS",
+            "https://linkdownload.ajaynxt.com,https://ajaynxt.github.io",
+        ).split(",")
         if origin.strip()
     )
     allowed_hosts: tuple[str, ...] = tuple(
         host.strip().lower()
-        for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver").split(",")
+        for host in os.getenv(
+            "ALLOWED_HOSTS",
+            "allwebsite-downlod.onrender.com,download.ajaynxt.com,localhost,127.0.0.1,testserver",
+        ).split(",")
         if host.strip()
     )
-    trust_proxy: bool = os.getenv("TRUST_PROXY", "false").lower() == "true"
-    enable_hsts: bool = os.getenv("ENABLE_HSTS", "false").lower() == "true"
+    trust_proxy: bool = os.getenv("TRUST_PROXY", "true").lower() == "true"
+    enable_hsts: bool = os.getenv("ENABLE_HSTS", "true").lower() == "true"
 
     @property
     def is_production(self) -> bool:
