@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en-IN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f4f0e8">
+    <meta name="description" content="Save permitted public videos, Pinterest Pins, Reels and audio in the best available quality with AJAYNXT's free A TO Z Link Downloader.">
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+    <meta name="author" content="AJAYNXT">
+    <meta name="application-name" content="A TO Z Link Downloader">
+    <meta name="api-base-url" content="https://download.ajaynxt.com">
+    
+    <link rel="canonical" href="https://ajaynxt.github.io/allwebsite-downlod/">
+    <link rel="alternate" hreflang="en-IN" href="https://ajaynxt.github.io/allwebsite-downlod/">
+    <link rel="alternate" hreflang="x-default" href="https://ajaynxt.github.io/allwebsite-downlod/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="A TO Z Link Downloader">
+    <meta property="og:title" content="A TO Z Link Downloader – Video, Reel &amp; Audio">
+    <meta property="og:description" content="One public link. Best available permitted video or audio quality.">
+    <meta property="og:url" content="https://ajaynxt.github.io/allwebsite-downlod/">
+    <meta property="og:image" content="https://ajaynxt.github.io/allwebsite-downlod/app/static/social-cover.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="A TO Z Link Downloader by AJAYNXT">
+    <meta name="twitter:description" content="Save permitted public videos, Reels and audio in the best available quality.">
+    <meta name="twitter:image" content="https://ajaynxt.github.io/allwebsite-downlod/app/static/social-cover.png">
+    <title>A TO Z Link Downloader – Video, Reel &amp; Audio | AJAYNXT</title>
+    <link rel="icon" href="./app/static/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" defer></script>
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://ajaynxt.com/#organization","name":"AJAYNXT","url":"https://ajaynxt.com/","email":"ajayx3neha@gmail.com","sameAs":["https://www.instagram.com/ajay_nxt_/","https://x.com/Ajay_Nxt_"]},{"@type":"WebSite","@id":"https://ajaynxt.github.io/allwebsite-downlod/#website","url":"https://ajaynxt.github.io/allwebsite-downlod/","name":"A TO Z Link Downloader","publisher":{"@id":"https://ajaynxt.com/#organization"},"inLanguage":"en-IN"},{"@type":"WebApplication","@id":"https://ajaynxt.github.io/allwebsite-downlod/#app","name":"A TO Z Link Downloader","url":"https://ajaynxt.github.io/allwebsite-downlod/","applicationCategory":"MultimediaApplication","operatingSystem":"Any","isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"INR"},"description":"Save permitted public video, Reel and audio links in the best available source quality.","publisher":{"@id":"https://ajaynxt.com/#organization"}}]}</script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to downloader</a>
+
+    <header class="site-header">
+      <a class="brand" href="./" aria-label="A TO Z Link Downloader home">
+        <span class="brand-mark" aria-hidden="true"><img src="./app/static/ajaynxt-panther-logo.jpeg" alt="" width="48" height="48"></span>
+        <span class="brand-copy">
+          <strong>A TO Z</strong>
+          <small>LINK DOWNLOADER</small>
+        </span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="./supported-sites.html">Supported sites</a>
+        <a href="#how">How it works</a>
+        <a class="support-nav" href="upi://pay?pa=9929562585@ybl&amp;pn=AJAYNXT&amp;cu=INR&amp;tn=Support%20A%20TO%20Z%20Link%20Downloader">Support AJAYNXT</a>
+        <a class="nav-cta" href="#downloader">Download now</a>
+      </nav>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="downloader">
+        <div class="hero-copy">
+          <p class="eyebrow"><span></span> One link. Every useful format.</p>
+          <h1>Paste it.<br><em>Keep it.</em></h1>
+          <p class="hero-intro">Public video, Reel or audio link paste karo. Available qualities dekho aur apne permitted content ko best quality mein save karo.</p>
+
+          <div class="service-finder" aria-labelledby="service-finder-label">
+            <label id="service-finder-label" for="service-query">Find your downloader</label>
+            <div class="service-search-shell">
+              <span aria-hidden="true">⌕</span>
+              <input id="service-query" type="search" role="combobox" autocomplete="off" spellcheck="false" aria-autocomplete="list" aria-controls="service-suggestions" aria-expanded="false" placeholder="Try: insta reel, pintrest, yt audio…">
+            </div>
+            <div class="service-suggestions" id="service-suggestions" role="listbox" aria-label="Matching downloader suggestions" hidden></div>
+            <div class="popular-searches" aria-label="Popular searches">
+              <span>Popular:</span>
+              <button type="button" data-service-key="instagram">Insta Reel</button>
+              <button type="button" data-service-key="pinterest">Pinterest</button>
+              <button type="button" data-service-key="youtube">YouTube</button>
+              <button type="button" data-service-key="facebook">Facebook</button>
+            </div>
+            <p class="service-selected" id="service-selected" role="status" hidden></p>
+          </div>
+
+          <form class="link-form" id="link-form" novalidate>
+            <label for="media-url">Media link</label>
+            <div class="input-shell">
+              <span class="link-symbol" aria-hidden="true"></span>
+              <input id="media-url" name="url" type="url" inputmode="url" autocomplete="url" maxlength="2048" placeholder="https://youtube.com/watch?v=..." required>
+              <button class="analyze-button" id="analyze-button" type="submit">
+                <span>Read link</span>
+                <i aria-hidden="true">↗</i>
+              </button>
+            </div>
+            <p class="field-help">YouTube · Instagram Reels · Pinterest · public websites · direct media links</p>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+          </form>
+
+          <ul class="platform-row" aria-label="Common link types">
+            <li><span class="platform-dot youtube"></span>YouTube</li>
+            <li><span class="platform-dot instagram"></span>Reels</li>
+            <li><span class="platform-dot web"></span>Pinterest</li>
+            <li><span class="platform-dot audio"></span>Audio</li>
+          </ul>
+        </div>
+
+        <aside class="quality-note" aria-label="Quality promise">
+          <span class="quality-number">01</span>
+          <div>
+            <strong>Best available</strong>
+            <p>No forced video re-compression. Quality platform par available source ke hisaab se hoti hai.</p>
+          </div>
+        </aside>
+      </section>
+
+      <aside class="owner-ad" aria-label="AJAYNXT advertisement"><span>AJAYNXT AD</span><div><strong>Website ya app banwani hai?</strong><p>AJAYNXT se premium website, automation aur digital product banwayein.</p></div><a href="https://ajaynxt.com/" target="_blank" rel="sponsored noopener">Know more ↗</a></aside>
+
+      <section class="platform-section" aria-labelledby="platform-title">
+        <div class="platform-heading">
+          <p class="eyebrow"><span></span> Public links we can read</p>
+          <h2 id="platform-title">One tool.<br><em>Many platforms.</em></h2>
+          <p>Single public media links work best. Platform support can change when a service changes access rules.</p>
+          <a href="./supported-sites.html">See supported sites &amp; limits →</a>
+        </div>
+        <ul class="platform-cloud">
+          <li>YouTube</li><li>Instagram Reels</li><li>Pinterest</li><li>Facebook</li>
+          <li>TikTok</li><li>X / Twitter</li><li>Reddit</li><li>Vimeo</li>
+          <li>SoundCloud</li><li>LinkedIn</li><li>Snapchat Spotlight</li><li>Direct media</li>
+        </ul>
+      </section>
+
+      <section class="result-section" id="result" aria-labelledby="result-title" hidden>
+        <div class="section-label"><span>LINK READ</span><b></b></div>
+        <div class="result-grid">
+          <article class="media-card">
+            <div class="thumbnail-wrap">
+              <img id="media-thumbnail" alt="" referrerpolicy="no-referrer" hidden>
+              <div class="thumbnail-fallback" id="thumbnail-fallback" aria-hidden="true">
+                <span class="fallback-play"></span>
+              </div>
+              <span class="source-badge" id="source-badge">Media</span>
+              <span class="duration-badge" id="duration-badge" hidden></span>
+            </div>
+            <div class="media-copy">
+              <p id="media-creator">Public media</p>
+              <h2 id="result-title">Media title</h2>
+            </div>
+          </article>
+
+          <div class="quality-panel">
+            <div class="panel-heading">
+              <div>
+                <p>CHOOSE OUTPUT</p>
+                <h3>Quality &amp; format</h3>
+              </div>
+              <span class="quality-seal">HQ</span>
+            </div>
+
+            <div class="format-tabs" role="tablist" aria-label="Output type">
+              <button id="video-tab" type="button" role="tab" aria-selected="true">Video</button>
+              <button id="audio-tab" type="button" role="tab" aria-selected="false">Audio</button>
+            </div>
+
+            <div class="format-options" id="format-options" role="radiogroup" aria-label="Available qualities"></div>
+
+            <label class="rights-check">
+              <input id="rights-confirmed" type="checkbox">
+              <span>I own this content or have permission to download it.</span>
+            </label>
+
+            <button class="download-button" id="download-button" type="button">
+              <span>Download selected</span>
+              <i aria-hidden="true">↓</i>
+            </button>
+            <p class="panel-error" id="download-error" role="alert" hidden></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="job-section" id="job-section" aria-labelledby="job-title" hidden>
+        <div class="job-copy">
+          <p class="eyebrow"><span></span> Preparing your file</p>
+          <h2 id="job-title">Best quality,<br>coming through.</h2>
+        </div>
+        <div class="job-status" aria-live="polite">
+          <div class="job-status-head">
+            <span id="job-message">Queue mein add ho gaya</span>
+            <strong id="job-percent">0%</strong>
+          </div>
+          <progress id="job-progress" max="100" value="0">0%</progress>
+          <p>Is page ko file ready hone tak open rakhein.</p>
+          <a class="ready-button" id="ready-button" href="#" download hidden>
+            <span>Save file</span><i aria-hidden="true">↓</i>
+          </a>
+        </div>
+      </section>
+
+      <section class="how-section" id="how" aria-labelledby="how-title">
+        <div class="section-label light"><span>HOW IT WORKS</span><b></b></div>
+        <div class="how-heading">
+          <h2 id="how-title">From link to file.<br><em>Three clean steps.</em></h2>
+          <p>No clutter, fake controls or confusing formats. The useful choices stay visible.</p>
+        </div>
+        <ol class="steps">
+          <li>
+            <span>01</span>
+            <h3>Paste link</h3>
+            <p>Single public video, Reel or media-page URL paste karo.</p>
+          </li>
+          <li>
+            <span>02</span>
+            <h3>Pick quality</h3>
+            <p>Best, 4K/1080p options ya MP3/M4A audio select karo.</p>
+          </li>
+          <li>
+            <span>03</span>
+            <h3>Save file</h3>
+            <p>Server file prepare karega; ready hote hi secure download milega.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="trust-section" aria-label="Product principles">
+        <div>
+          <span class="trust-icon shield" aria-hidden="true"></span>
+          <h3>Private by default</h3>
+          <p>Link history ya downloaded media permanent library mein save nahi hota.</p>
+        </div>
+        <div>
+          <span class="trust-icon spark" aria-hidden="true"></span>
+          <h3>Quality first</h3>
+          <p>Highest available streams ko merge karke practical best output diya jata hai.</p>
+        </div>
+        <div>
+          <span class="trust-icon clock" aria-hidden="true"></span>
+          <h3>Auto cleanup</h3>
+          <p>Temporary files configured expiry ke baad server se remove ho jati hain.</p>
+        </div>
+      </section>
+
+      <section class="support-section" id="support" aria-labelledby="support-title">
+        <div>
+          <p class="eyebrow"><span></span> Keep it useful</p>
+          <h2 id="support-title">Support<br><em>AJAYNXT.</em></h2>
+        </div>
+        <div class="support-card">
+          <p>Aapka support server, maintenance aur quality updates ko chalu rakhne mein help karta hai. Payment seedha AJAYNXT ke configured account mein jata hai.</p>
+          <div class="support-actions"><a class="support-primary" href="upi://pay?pa=9929562585@ybl&amp;pn=AJAYNXT&amp;cu=INR&amp;tn=Support%20A%20TO%20Z%20Link%20Downloader">Pay securely with UPI ↗</a><button class="copy-upi" type="button" data-copy-upi="9929562585@ybl"><span>9929562585@ybl</span><small>Copy UPI ID</small></button></div>
+          <small>Payment voluntary hai; downloader access free hai.</small>
+        </div>
+      </section>
+
+      <section class="faq-section" id="faq" aria-labelledby="faq-title">
+        <div class="faq-heading">
+          <p class="eyebrow"><span></span> Useful answers</p>
+          <h2 id="faq-title">Before you paste.</h2>
+        </div>
+        <div class="faq-list">
+          <details>
+            <summary>Does every website work?<span>+</span></summary>
+            <p>Thousands of public sites and generic embedded media can work, but private/login-only, DRM-protected, expired or platform-blocked links may not.</p>
+          </details>
+          <details>
+            <summary>Why can a Reel fail?<span>+</span></summary>
+            <p>Instagram and similar platforms frequently change access rules. A public single-Reel link works best; login-only content is intentionally not accessed.</p>
+          </details>
+          <details>
+            <summary>Can I save a Pinterest video Pin?<span>+</span></summary>
+            <p>A public single-Pin URL can work when the Pin exposes downloadable media. Private boards, login-only Pins and whole-board downloads are not supported.</p>
+          </details>
+          <details>
+            <summary>Is “Best Quality” always 4K?<span>+</span></summary>
+            <p>No. It selects the highest quality actually offered for that media. If the source is 1080p, the output cannot truthfully become native 4K.</p>
+          </details>
+          <details>
+            <summary>What am I allowed to download?<span>+</span></summary>
+            <p>Only content you own, have permission to use, or are otherwise legally entitled to download. Platform terms and local law still apply.</p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-brand">
+        <strong>A TO Z</strong>
+        <span>LINK DOWNLOADER</span>
+      </div>
+      <p>Owned &amp; built by <a href="https://ajaynxt.com" rel="noopener noreferrer">AJAYNXT</a> · <a href="mailto:ajayx3neha@gmail.com">Contact</a></p>
+      <nav class="footer-links" aria-label="Legal links"><a href="./privacy.html">Privacy</a><a href="./terms.html">Terms</a><a href="./copyright.html">Copyright</a><a href="#downloader">Top ↑</a></nav>
+    </footer>
+  </body>
+</html>
