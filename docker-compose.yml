@@ -1,0 +1,47 @@
+services:
+  downloader:
+    build:
+      context: .
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8000"
+    environment:
+      APP_NAME: "${APP_NAME:-A TO Z Link Downloader}"
+      APP_ENV: production
+      DATA_DIR: /app/data/jobs
+      PUBLIC_BASE_URL: "${PUBLIC_BASE_URL:-https://download.ajaynxt.com}"
+      ALLOWED_HOSTS: "${ALLOWED_HOSTS:-download.ajaynxt.com,localhost,127.0.0.1}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-}"
+      TRUST_PROXY: "true"
+      ENABLE_HSTS: "${ENABLE_HSTS:-false}"
+      OWNER_NAME: "${OWNER_NAME:-AJAYNXT}"
+      CONTACT_EMAIL: "${CONTACT_EMAIL:-ajayx3neha@gmail.com}"
+      SUPPORT_UPI_ID: "${SUPPORT_UPI_ID:-9929562585@ybl}"
+      BUY_ME_A_COFFEE_URL: "${BUY_ME_A_COFFEE_URL:-}"
+      GOOGLE_SITE_VERIFICATION: "${GOOGLE_SITE_VERIFICATION:-}"
+      ADSENSE_PUBLISHER_ID: "${ADSENSE_PUBLISHER_ID:-}"
+      OWNER_AD_TITLE: "${OWNER_AD_TITLE:-Website ya app banwani hai?}"
+      OWNER_AD_TEXT: "${OWNER_AD_TEXT:-AJAYNXT se premium website, automation aur digital product banwayein.}"
+      OWNER_AD_URL: "${OWNER_AD_URL:-https://ajaynxt.com/}"
+      MAX_DOWNLOAD_BYTES: "${MAX_DOWNLOAD_BYTES:-1073741824}"
+      MAX_DURATION_SECONDS: "${MAX_DURATION_SECONDS:-10800}"
+      SOCKET_TIMEOUT_SECONDS: "${SOCKET_TIMEOUT_SECONDS:-20}"
+      JOB_TTL_SECONDS: "${JOB_TTL_SECONDS:-3600}"
+      MAX_WORKERS: "${MAX_WORKERS:-2}"
+      ANALYZE_LIMIT_PER_15_MIN: "${ANALYZE_LIMIT_PER_15_MIN:-20}"
+      DOWNLOAD_LIMIT_PER_15_MIN: "${DOWNLOAD_LIMIT_PER_15_MIN:-6}"
+    volumes:
+      - media_jobs:/app/data/jobs
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,uid=10001,gid=10001,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    mem_limit: 1536m
+    cpus: 2.0
+
+volumes:
+  media_jobs:
