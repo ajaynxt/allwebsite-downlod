@@ -16,11 +16,9 @@ RUN python -m pip install --requirement requirements.lock
 
 RUN groupadd --system --gid 10001 appuser \
     && useradd --system --uid 10001 --gid appuser --home-dir /app --shell /usr/sbin/nologin appuser \
-    && mkdir -p /app/data/jobs \
     && chown -R appuser:appuser /app
 
 COPY --chown=appuser:appuser app ./app
-COPY --chown=appuser:appuser data ./data
 
 USER 10001:10001
 EXPOSE 8000

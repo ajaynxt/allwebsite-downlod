@@ -20,13 +20,13 @@ Task clarity, truthful quality language, deliberate hierarchy, low visual noise,
 - Output tabs: Video/Audio with selected state and keyboard-native buttons
 - Format option: label, detail, estimate, default/hover/focus/selected states
 - Permission control: native checkbox plus actionable validation
-- Job status: message, percentage, native progress, ready link or failed message
+- Direct-download status: preparation state, transfer progress, success or failed message
 - FAQ: native details/summary disclosure
 
 ## Responsive rules
 
 - Desktop hero uses a primary content column and a small quality note, not a competing visual
-- Tablet stacks results and job content
+- Tablet stacks results and direct-download status content
 - Mobile turns the URL field action into a full-width second row and all quality choices into one column
 - No critical interaction relies on hover
 

@@ -10,7 +10,7 @@ A single-task utility with progressive disclosure: the initial screen asks only 
 
 ## Information architecture and flow
 
-`Paste link → Read metadata → Choose video/audio quality → Confirm permission → Prepare job → Save file`.
+`Paste link → Read metadata → Choose video/audio quality → Confirm permission → Prepare once → Direct device download`.
 
 Secondary sections explain the three-step process, privacy/quality/cleanup principles, and limitations. Navigation stays intentionally small.
 

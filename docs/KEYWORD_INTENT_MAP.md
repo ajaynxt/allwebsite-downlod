@@ -2,7 +2,7 @@
 
 | Page | Primary intent | Natural query themes | Conversion |
 |---|---|---|---|
-| `/` | Use a downloader | link downloader, video downloader, Reel downloader, audio downloader, best quality | Link analyzed → file ready |
+| `/` | Use a downloader | link downloader, video downloader, Reel downloader, audio downloader, best quality | Link analyzed → direct device download |
 | `/supported-sites` | Check compatibility | Pinterest video Pin download, public Reel support, supported video sites | Return to downloader |
 | `/privacy` | Trust | downloader privacy, temporary files | Trust/support |
 | `/terms` | Responsible use | permitted content download, downloader terms | Rights confirmation |

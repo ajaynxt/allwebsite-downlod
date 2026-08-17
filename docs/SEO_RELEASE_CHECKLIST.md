@@ -1,6 +1,7 @@
 # SEO and monetization release checklist
 
-- [ ] `download.ajaynxt.com` resolves to the intended VPS only.
+- [ ] `linkdownload.ajaynxt.com` resolves to GitHub Pages.
+- [ ] `download.ajaynxt.com` resolves to the intended API VPS only.
 - [ ] HTTPS is valid; HTTP redirects once to the canonical HTTPS URL.
 - [ ] Home, supported sites and legal pages return `200` with self-canonicals.
 - [ ] `/robots.txt` references the production sitemap.

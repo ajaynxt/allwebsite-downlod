@@ -8,14 +8,14 @@ A GitHub-ready, mobile-first web app that analyzes a single public media URL and
 - Metadata preview: title, creator, platform, thumbnail, and duration
 - Best available video plus practical resolution choices such as 4K, 1440p, 1080p, and 720p when the source offers them
 - MP3 320 kbps conversion and M4A audio output through FFmpeg
-- Background jobs with real progress, error, success, and expiry states
+- Direct browser delivery with isolated request-time processing and immediate server cleanup
 - Responsive accessible UI, keyboard focus, reduced-motion support, and Hindi-friendly copy
 - AJAYNXT ownership, direct UPI support, editable owner-ad slot, privacy/terms/copyright pages
 - Canonical metadata, Open Graph image, JSON-LD, `robots.txt`, XML sitemap, and search-console checklist
 - Smart platform finder that suggests the right service for `insta`, `pintrest`, `yt audio` and similar misspelled searches
 - Docker/VPS deployment, Nginx example, health check, non-root container, limits, security headers, URL validation, and rate limits
 
-> This project is not a GitHub Pages-only site. Media extraction needs Python, FFmpeg, Node.js, storage, and outbound network access, so deploy the repository on a VPS or a compatible container host.
+> This project is not a GitHub Pages-only site. Media extraction needs Python, FFmpeg, Node.js, temporary working space, and outbound network access, so deploy the API on a VPS or compatible container host. No Cloud Storage or permanent media library is used.
 
 ## Responsible use
 
@@ -57,15 +57,16 @@ Open `http://127.0.0.1:8000`.
 
 The application port is intentionally bound to `127.0.0.1`; expose only Nginx ports 80/443 publicly.
 
-## GoDaddy domain connection
+## Domain connection
 
-In the DNS manager for `ajaynxt.com`, create this record after you have the VPS public IPv4 address:
+The site and API intentionally use separate hosts. In the DNS manager for `ajaynxt.com`, use:
 
 | Type | Name | Value | TTL |
 |---|---|---|---|
+| `CNAME` | `linkdownload` | `ajaynxt.github.io` | default/600 |
 | `A` | `download` | your VPS public IPv4 | default/600 |
 
-Use an `AAAA` record only when the VPS has working public IPv6. Do not point a CNAME at an IP address. After DNS resolves, request the TLS certificate for `download.ajaynxt.com` and then turn on HSTS.
+`linkdownload.ajaynxt.com` serves the GitHub Pages frontend; `download.ajaynxt.com` serves the FastAPI/FFmpeg backend. Use an `AAAA` record only when the VPS has working public IPv6. Do not point a CNAME at an IP address. After backend DNS resolves, request the TLS certificate for `download.ajaynxt.com` and then turn on HSTS.
 
 ## Configuration
 
@@ -77,10 +78,10 @@ Use an `AAAA` record only when the VPS has working public IPv6. Do not point a C
 | `ENABLE_HSTS` | `false` | Adds HSTS after HTTPS is verified |
 | `MAX_DOWNLOAD_BYTES` | 1 GiB | Per-file size cap |
 | `MAX_DURATION_SECONDS` | 10,800 | Three-hour media limit |
-| `JOB_TTL_SECONDS` | 3,600 | Temporary file expiry |
-| `MAX_WORKERS` | 2 | Concurrent media jobs |
+| `TEMP_DIR` | `/tmp/atoz-link-downloader` | Isolated non-persistent request workspace |
+| `MAX_WORKERS` | 2 | Concurrent direct-download preparations |
 | `ANALYZE_LIMIT_PER_15_MIN` | 20 | Per-IP analyze limit |
-| `DOWNLOAD_LIMIT_PER_15_MIN` | 6 | Per-IP job limit |
+| `DOWNLOAD_LIMIT_PER_15_MIN` | 6 | Per-IP direct-download limit |
 | `SUPPORT_UPI_ID` | `9929562585@ybl` | Direct support payment deep link and copy button |
 | `BUY_ME_A_COFFEE_URL` | blank | Optional external Buy Me a Coffee profile URL |
 | `OWNER_AD_TITLE/TEXT/URL` | AJAYNXT service ad | Editable first-party advertisement |
@@ -93,8 +94,8 @@ The owner ad works immediately and is edited only through `.env`. AdSense code i
 
 1. `POST /api/analyze` with `{ "url": "https://..." }`
 2. `POST /api/download` with the analyzed URL, output mode, quality ID, and `rights_confirmed: true`
-3. Poll the returned `status_url`
-4. Download from `file_url` when status becomes `ready`
+3. Receive the attachment in the same response
+4. The isolated temporary request directory is deleted after delivery or failure
 
 Interactive API docs are available at `/api/docs` in development and disabled in production.
 
@@ -114,11 +115,12 @@ To rebuild the static GitHub Pages preview from the production templates:
 python -m scripts.build_github_pages
 ```
 
-The generated `pages-dist/` files are published at the repository root. The visual site works on GitHub Pages; actual media extraction still calls the separately deployed FastAPI/FFmpeg backend configured by `FRONTEND_API_BASE_URL`.
+The generated `pages-dist/` files are published at the repository root with `CNAME=linkdownload.ajaynxt.com`. The visual site works on GitHub Pages; actual media extraction still calls the separately deployed FastAPI/FFmpeg backend at `https://download.ajaynxt.com`.
 
 ## Operational notes
 
-- Jobs are held in process memory and temporary files live in the Docker volume. A restart invalidates active job links; users can start again.
+- Submitted links, job histories and downloaded media are not stored in a database or Cloud Storage. Processing uses a per-request `/tmp` folder that is deleted after delivery or failure.
+- The frontend buffers the returned attachment in the user's browser before triggering the device save prompt. Keep practical file-size limits for mobile reliability.
 - Site support changes when platforms change. Keep `yt-dlp` current through reviewed dependency updates and CI testing.
 - App-level URL validation blocks loopback, private, link-local, reserved addresses, credentials, non-web schemes, and non-standard ports. Because third-party extractors follow their own redirects, production should also block private/link-local destinations at the VPS/container egress layer.
 - In-memory rate limiting is suitable for the supplied single-worker deployment. Use a shared rate-limit store before running multiple app replicas.

@@ -1,1 +1,1 @@
-"""Service layer for extraction, jobs, and abuse controls."""
+"""Service layer for extraction, direct delivery, and abuse controls."""

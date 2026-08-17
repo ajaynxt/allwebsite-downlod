@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">A TO Z Link Downloader by AJAYNXT</title>
+  <desc id="desc">A warm editorial social sharing card for the public video, Reel and audio downloader.</desc>
+  <rect width="1200" height="630" fill="#f4f0e8"/>
+  <circle cx="1015" cy="100" r="230" fill="none" stroke="#121719" stroke-opacity=".09" stroke-width="2"/>
+  <circle cx="1015" cy="100" r="170" fill="none" stroke="#121719" stroke-opacity=".07" stroke-width="2"/>
+  <rect x="72" y="64" width="66" height="66" rx="33" fill="#121719"/>
+  <path d="M101 84v25m-12-9 19 19" stroke="#ff6542" stroke-width="8" stroke-linecap="round"/>
+  <text x="160" y="91" fill="#121719" font-family="Arial, sans-serif" font-size="29" font-weight="800" letter-spacing="3">A TO Z</text>
+  <text x="160" y="119" fill="#626968" font-family="Arial, sans-serif" font-size="13" font-weight="700" letter-spacing="4">LINK DOWNLOADER</text>
+  <text x="72" y="272" fill="#121719" font-family="Georgia, serif" font-size="103" letter-spacing="-6">Paste it.</text>
+  <text x="72" y="370" fill="#d73f22" font-family="Georgia, serif" font-size="103" font-style="italic" letter-spacing="-6">Keep it.</text>
+  <text x="78" y="438" fill="#626968" font-family="Arial, sans-serif" font-size="25">Public video · Reels · Pinterest · Audio</text>
+  <rect x="72" y="497" width="388" height="65" rx="33" fill="#121719"/>
+  <text x="108" y="538" fill="#fffdf8" font-family="Arial, sans-serif" font-size="20" font-weight="700">BEST AVAILABLE QUALITY  ↗</text>
+  <text x="971" y="566" fill="#121719" font-family="Arial, sans-serif" font-size="20" font-weight="800" text-anchor="end">BY AJAYNXT</text>
+</svg>

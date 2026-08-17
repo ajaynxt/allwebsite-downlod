@@ -182,7 +182,7 @@ class MediaDownloader:
         url: str,
         mode: str,
         format_id: str,
-        job_dir: Path,
+        temp_dir: Path,
         progress_hook: Any,
         postprocessor_hook: Any,
     ) -> Path:
@@ -212,11 +212,11 @@ class MediaDownloader:
         options: dict[str, Any] = {
             **self._base_options(),
             "format": selector,
-            "outtmpl": str(job_dir / "%(title).120B [%(id)s].%(ext)s"),
+            "outtmpl": str(temp_dir / "%(title).120B [%(id)s].%(ext)s"),
             "restrictfilenames": True,
             "windowsfilenames": True,
             "overwrites": False,
-            "continuedl": True,
+            "continuedl": False,
             "progress_hooks": [progress_hook],
             "postprocessor_hooks": [postprocessor_hook],
             "match_filter": match_filter,
@@ -249,13 +249,13 @@ class MediaDownloader:
 
         candidates = [
             path
-            for path in job_dir.iterdir()
+            for path in temp_dir.iterdir()
             if path.is_file() and path.suffix.lower() not in {".part", ".ytdl", ".json"}
         ]
         if not candidates:
             raise MediaExtractionError("Downloaded file could not be prepared.")
         output = max(candidates, key=lambda item: item.stat().st_size).resolve()
-        if output.parent != job_dir.resolve():
+        if output.parent != temp_dir.resolve():
             raise MediaExtractionError("Unsafe output path was rejected.")
         if output.stat().st_size > self.settings.max_download_bytes:
             output.unlink(missing_ok=True)

@@ -7,8 +7,8 @@
 - Public URL/SSRF preflight validation
 - yt-dlp metadata analysis and video/audio quality mapping
 - FFmpeg video merge, MP3, and M4A outputs
-- Bounded background job manager with progress and expiry
-- Per-IP single-process rate limits and queue/resource caps
+- Bounded direct-download processing with browser transfer progress and immediate cleanup
+- Per-IP single-process rate limits and worker/resource caps
 - Security headers, same-origin default, generic production errors, no access URL logging
 - Non-root read-only Docker service, Nginx sample, health check, CI, unit tests
 - Architecture, UX, security, deployment, rollback, and release documents
@@ -26,4 +26,4 @@ UPI is a direct deep link, not an in-app payment processor. Analytics event hook
 
 ## Migration
 
-New project; no data migration. Deployment creates only ephemeral job state and temporary media output.
+New project; no data migration. Deployment creates only an isolated request-time temporary output and deletes it after delivery/failure.

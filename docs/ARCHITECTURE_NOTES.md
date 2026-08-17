@@ -2,7 +2,7 @@
 
 ## Decision
 
-Use a modular Python/FastAPI monolith serving a static same-origin frontend. Run one application process with a bounded thread pool for media jobs. Package the system as a non-root Docker container behind Nginx.
+Use a modular Python/FastAPI monolith serving a static same-origin frontend. Run one application process with bounded direct-download preparation. Package the system as a non-root Docker container behind Nginx.
 
 ## Why
 
@@ -20,7 +20,9 @@ Browser
       -> URL validation + rate limit
       -> yt-dlp metadata/media requests
       -> FFmpeg merge/audio conversion
-      -> temporary Docker volume
+      -> isolated request folder in non-persistent /tmp
+      -> attachment response to browser
+      -> immediate folder deletion
 ```
 
 ## Boundaries
@@ -28,18 +30,17 @@ Browser
 - `models.py`: strict request/response contracts
 - `security.py`: public URL validation and SSRF preflight
 - `services/downloader.py`: yt-dlp/FFmpeg adapter and format mapping
-- `services/jobs.py`: bounded background execution, progress, capability IDs, expiry
 - `services/rate_limit.py`: single-process sliding window
-- `main.py`: HTTP routes, middleware, errors, static delivery
+- `main.py`: direct attachment response, immediate cleanup, middleware, errors, static delivery
 
 ## Rendering and persistence
 
-The landing page is static and progressively enhanced with small client JavaScript. API responses are dynamic and `no-store`. Job state is intentionally ephemeral in memory; output files use a temporary volume and expire. There is no database, authentication, or permanent media library.
+The landing page is static and progressively enhanced with small client JavaScript. API responses are dynamic and `no-store`. A download is prepared once in an isolated `/tmp` request folder, sent as an attachment, and removed by a response background task. There is no database, Cloud Storage, job history, authentication, or permanent media library.
 
 ## Scale boundary
 
-Before multiple replicas, replace in-memory jobs/rate limits with a shared queue and shared rate-limit store, move outputs to short-lived object storage, and add explicit worker isolation. Do not simply increase Uvicorn workers because each process would have separate job state.
+Before multiple replicas, replace the in-memory rate limiter with a shared edge/rate-limit store and add explicit worker isolation. Direct requests remain stateless and must not be moved into permanent object storage.
 
 ## Rollback
 
-Keep the previous image tag. Roll back Nginx upstream/image, recreate the container, and accept that in-flight ephemeral jobs must be restarted by users. No database migration is involved.
+Keep the previous image tag. Roll back Nginx upstream/image and recreate the container. In-flight requests must be restarted by users; no database migration is involved.

@@ -38,13 +38,14 @@ class Settings:
         "OWNER_AD_TEXT", "AJAYNXT se premium website, automation aur digital product banwayein."
     ).strip()
     owner_ad_url: str = os.getenv("OWNER_AD_URL", "https://ajaynxt.com/").strip()
-    data_dir: Path = Path(os.getenv("DATA_DIR", str(BASE_DIR / "data" / "jobs"))).resolve()
+    temp_dir: Path = Path(
+        os.getenv("TEMP_DIR", "/tmp/atoz-link-downloader")
+    ).resolve()
     max_download_bytes: int = _int_env(
         "MAX_DOWNLOAD_BYTES", 1_073_741_824, 10_485_760, 5_368_709_120
     )
     max_duration_seconds: int = _int_env("MAX_DURATION_SECONDS", 10_800, 60, 43_200)
     socket_timeout_seconds: int = _int_env("SOCKET_TIMEOUT_SECONDS", 20, 5, 120)
-    job_ttl_seconds: int = _int_env("JOB_TTL_SECONDS", 3_600, 300, 86_400)
     max_workers: int = _int_env("MAX_WORKERS", 2, 1, 8)
     analyze_limit: int = _int_env("ANALYZE_LIMIT_PER_15_MIN", 20, 1, 500)
     download_limit: int = _int_env("DOWNLOAD_LIMIT_PER_15_MIN", 6, 1, 100)
@@ -67,4 +68,4 @@ class Settings:
 
 
 settings = Settings()
-settings.data_dir.mkdir(parents=True, exist_ok=True)
+settings.temp_dir.mkdir(parents=True, exist_ok=True)

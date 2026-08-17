@@ -10,7 +10,7 @@
 
 ## Architecture and trust boundaries
 
-An anonymous browser uses same-origin static UI/API. FastAPI validates and rate-limits URLs before yt-dlp/FFmpeg process remote media inside a constrained non-root container. Outputs use random per-job directories and capability URLs, then expire. There is no authentication, database, cookie ingestion, upload, payment or permanent media library.
+An anonymous browser uses the static UI/API. FastAPI validates and rate-limits URLs before yt-dlp/FFmpeg process remote media inside a constrained non-root container. Each output uses an isolated request directory, is sent as an attachment, and is immediately removed. There is no authentication, database, Cloud Storage, reusable file URL, cookie ingestion, upload, payment or permanent media library.
 
 ## Controls implemented
 
@@ -19,7 +19,7 @@ An anonymous browser uses same-origin static UI/API. FastAPI validates and rate-
 | Strict input/business validation | Pass | Pydantic `extra=forbid`, URL/port/credential checks, output mode/quality/rights rules |
 | SSRF preflight | Partial | Private/reserved DNS/IP tests pass; network egress is still required for redirects/DNS rebinding |
 | Injection/path handling | Pass in reviewed scope | Embedded yt-dlp API, no user shell/SQL, restricted filename, canonical parent verification |
-| Resource controls | Pass in code/config | Rate limits, bounded queue/workers, byte/duration/time/retry limits, container CPU/RAM/PID caps |
+| Resource controls | Pass in code/config | Rate limits, bounded workers, byte/duration/time/retry limits, container CPU/RAM/PID caps |
 | Browser/API headers | Pass locally | CSP, nosniff, referrer, permissions, frame denial, API no-store observed |
 | Secrets/log minimization | Pass in reviewed scope | No required secrets, `.env` ignored, access log off, no full URL/request body application logging |
 | Supply chain | Pass with follow-up | Exact direct and Linux lock versions, pinned CI actions, audit reported no known vulnerability; image digest/SBOM pending |
@@ -30,7 +30,7 @@ An anonymous browser uses same-origin static UI/API. FastAPI validates and rate-
 | Command/check | Result | Evidence |
 |---|---|---|
 | `python -m compileall -q app tests` | Pass | No compile error |
-| `python -m unittest discover -s tests -v` | Pass | 9 tests passed |
+| `python -m unittest discover -s tests -v` | Pass | 16 tests passed |
 | `node --check app/static/app.js` | Pass | No syntax error |
 | HTML parser smoke check | Pass | Document parsed |
 | Local Uvicorn + `curl` | Pass | `/`, `/healthz`, CSP and security headers returned HTTP 200 |
@@ -49,7 +49,7 @@ An anonymous browser uses same-origin static UI/API. FastAPI validates and rate-
 | SEC-01 | Medium | App DNS validation cannot fully prevent extractor redirect/DNS-rebinding access to private networks | Residual | AJAYNXT: add/test VPS/container egress deny rules before public production |
 | SEC-02 | Medium | In-memory rate limiting is per process and IP-only | Accepted for one worker | AJAYNXT: add edge/shared limiter before replicas or high traffic |
 | SEC-03 | Medium | Third-party media parsers retain zero-day risk | Reduced by container and pins | AJAYNXT: patch routinely; consider dedicated worker sandbox at scale |
-| SEC-04 | Low | Capability file URL can be shared by its holder until expiry | Expected design | Keep TLS/no-referrer/short expiry; add accounts only if private library is required |
+| SEC-04 | Resolved | Reusable capability file URL removed | Direct attachment response with immediate cleanup | Retest cleanup on staging disconnects |
 | SEC-05 | Info | User permission checkbox cannot technically prove copyright rights | Product/legal control | Publish abuse/takedown contact and enforce platform/local-law policy |
 
 ## Skipped or inconclusive checks
@@ -70,7 +70,7 @@ An anonymous browser uses same-origin static UI/API. FastAPI validates and rate-
 - Firewall/ports: app binds localhost in Compose; VPS verification pending
 - Logging/alerts: minimal local logging; external monitoring owner pending
 - Backups/restore: source/config need backup; ephemeral media intentionally not backed up
-- Rollback: previous image/source/config restoration, with in-flight jobs restarted
+- Rollback: previous image/source/config restoration, with in-flight requests restarted
 
 ## Final release decision
 

@@ -3,7 +3,7 @@
 ## Application evidence
 
 - [x] Compile check passed
-- [x] Unit tests passed (9/9)
+- [x] Unit tests passed (16/16)
 - [x] Dependency audit reviewed with no known vulnerability reported for direct requirements
 - [x] Secret pattern scan reviewed; no credential/private-key match
 - [ ] Docker image built
@@ -25,10 +25,10 @@
 
 ## Functional launch tests
 
-- [ ] One owned/permitted YouTube video: analyze, quality select, ready file
+- [ ] One owned/permitted YouTube video: analyze, quality select, direct attachment
 - [ ] One owned/permitted public Reel where platform allows extraction
 - [ ] MP3 and M4A outputs play correctly
 - [ ] Invalid/private/playlist/live links fail safely
 - [ ] Mobile narrow viewport, keyboard path, 200% zoom and screen reader status tested
-- [ ] File disappears after configured expiry
-- [ ] Rate limits and queue-full states return actionable errors
+- [ ] Temporary request folder disappears immediately after success and failure
+- [ ] Rate limits and worker saturation return actionable errors

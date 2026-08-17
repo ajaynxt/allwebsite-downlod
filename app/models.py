@@ -55,16 +55,3 @@ class DownloadRequest(StrictModel):
             raise ValueError("Confirm that you own the content or have permission")
         return value
 
-
-class JobCreated(StrictModel):
-    job_id: str
-    status_url: str
-
-
-class JobStatus(StrictModel):
-    job_id: str
-    status: Literal["queued", "downloading", "processing", "ready", "failed"]
-    progress: int = Field(ge=0, le=100)
-    message: str
-    filename: str | None = None
-    file_url: str | None = None

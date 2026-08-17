@@ -22,7 +22,6 @@ const elements = {
   jobMessage: document.querySelector("#job-message"),
   jobPercent: document.querySelector("#job-percent"),
   jobProgress: document.querySelector("#job-progress"),
-  ready: document.querySelector("#ready-button"),
   serviceQuery: document.querySelector("#service-query"),
   serviceSuggestions: document.querySelector("#service-suggestions"),
   serviceSelected: document.querySelector("#service-selected"),
@@ -32,7 +31,7 @@ const state = {
   info: null,
   kind: "video",
   selected: null,
-  pollToken: 0,
+  downloadToken: 0,
 };
 
 const apiBaseUrl = (document.querySelector('meta[name="api-base-url"]')?.content || "")
@@ -351,7 +350,6 @@ function renderMedia(info) {
   elements.duration.hidden = !duration;
   setThumbnail(info.thumbnail, info.title);
   elements.rights.checked = false;
-  elements.ready.hidden = true;
   elements.jobSection.hidden = true;
   showError(elements.downloadError, "");
   selectKind("video");
@@ -363,7 +361,7 @@ function renderMedia(info) {
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
   showError(elements.formError, "");
-  state.pollToken += 1;
+  state.downloadToken += 1;
   try {
     const url = normalizeUrl(elements.url.value);
     setAnalyzeBusy(true);
@@ -384,38 +382,94 @@ elements.form.addEventListener("submit", async (event) => {
 elements.videoTab.addEventListener("click", () => selectKind("video"));
 elements.audioTab.addEventListener("click", () => selectKind("audio"));
 
-function updateJob(status) {
-  const progress = Math.max(0, Math.min(100, Number(status.progress) || 0));
-  elements.jobMessage.textContent = status.message;
-  elements.jobPercent.textContent = `${progress}%`;
-  elements.jobProgress.value = progress;
-  elements.jobProgress.textContent = `${progress}%`;
-}
-
-function wait(milliseconds) {
-  return new Promise((resolve) => window.setTimeout(resolve, milliseconds));
-}
-
-async function pollJob(statusUrl, token) {
-  for (let attempt = 0; attempt < 1800; attempt += 1) {
-    if (token !== state.pollToken) return;
-    const status = await requestJson(statusUrl, { method: "GET", headers: {} }, 20000);
-    updateJob(status);
-    if (status.status === "ready") {
-      elements.ready.href = resolveApiUrl(status.file_url);
-      elements.ready.setAttribute("download", status.filename || "media");
-      elements.ready.hidden = false;
-      elements.download.disabled = false;
-      elements.download.querySelector("span").textContent = "Download another";
-      track("download_ready", { platform: state.info?.platform || "unknown", mode: state.kind });
-      return;
-    }
-    if (status.status === "failed") {
-      throw new Error(status.message || "Download complete nahi hua.");
-    }
-    await wait(attempt < 30 ? 1000 : 2500);
+function updateDownloadStatus(message, progress = null) {
+  elements.jobMessage.textContent = message;
+  if (Number.isFinite(progress)) {
+    const safeProgress = Math.max(0, Math.min(100, progress));
+    elements.jobPercent.textContent = `${Math.round(safeProgress)}%`;
+    elements.jobProgress.value = safeProgress;
+    elements.jobProgress.textContent = `${Math.round(safeProgress)}%`;
+    return;
   }
-  throw new Error("Download session timed out. Please try again.");
+  elements.jobPercent.textContent = "DIRECT";
+  elements.jobProgress.removeAttribute("value");
+  elements.jobProgress.textContent = "Preparing direct download";
+}
+
+function responseFilename(response, fallback) {
+  const disposition = response.headers.get("Content-Disposition") || "";
+  const encoded = disposition.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (encoded) {
+    try {
+      return decodeURIComponent(encoded);
+    } catch {
+      return fallback;
+    }
+  }
+  return disposition.match(/filename="?([^";]+)"?/i)?.[1] || fallback;
+}
+
+async function receiveDirectDownload(payload, token) {
+  const controller = new AbortController();
+  const timer = window.setTimeout(() => controller.abort(), 1_800_000);
+  try {
+    const response = await fetch(resolveApiUrl("/api/download"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    if (!response.ok) {
+      let data = {};
+      try {
+        data = await response.json();
+      } catch {
+        data = {};
+      }
+      throw new Error(data.detail || "Download complete nahi hua.");
+    }
+
+    const total = Number(response.headers.get("Content-Length")) || 0;
+    const reader = response.body?.getReader();
+    const chunks = [];
+    let received = 0;
+    if (reader) {
+      while (true) {
+        if (token !== state.downloadToken) {
+          await reader.cancel();
+          throw new Error("Download cancelled because a new link was opened.");
+        }
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.byteLength;
+        const progress = total ? (received / total) * 100 : null;
+        updateDownloadStatus("File seedha aapke device par aa rahi hai", progress);
+      }
+    } else {
+      chunks.push(new Uint8Array(await response.arrayBuffer()));
+    }
+
+    const fallback = `ajaynxt-download.${payload.mode === "video" ? "mp4" : payload.mode}`;
+    const filename = responseFilename(response, fallback);
+    const blob = new Blob(chunks, { type: response.headers.get("Content-Type") || "application/octet-stream" });
+    const blobUrl = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = blobUrl;
+    anchor.download = filename;
+    anchor.hidden = true;
+    document.body.append(anchor);
+    anchor.click();
+    anchor.remove();
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60_000);
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new Error("Direct download timed out. Chhoti file ya lower quality try karein.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timer);
+  }
 }
 
 elements.download.addEventListener("click", async () => {
@@ -430,31 +484,26 @@ elements.download.addEventListener("click", async () => {
     return;
   }
 
-  const token = state.pollToken + 1;
-  state.pollToken = token;
+  const token = state.downloadToken + 1;
+  state.downloadToken = token;
   elements.download.disabled = true;
-  elements.download.querySelector("span").textContent = "Starting…";
-  elements.ready.hidden = true;
-  updateJob({ progress: 0, message: "Queue mein add ho raha hai" });
+  elements.download.querySelector("span").textContent = "Preparing…";
+  updateDownloadStatus("Temporary processing start ho rahi hai");
   elements.jobSection.hidden = false;
   elements.jobSection.scrollIntoView({ behavior: "smooth", block: "center" });
 
   try {
     const mode = state.selected.kind === "video" ? "video" : state.selected.extension;
-    const created = await requestJson(
-      "/api/download",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          url: state.info.webpage_url,
-          mode,
-          format_id: state.selected.id,
-          rights_confirmed: true,
-        }),
-      },
-      30000
-    );
-    await pollJob(created.status_url, token);
+    await receiveDirectDownload({
+      url: state.info.webpage_url,
+      mode,
+      format_id: state.selected.id,
+      rights_confirmed: true,
+    }, token);
+    updateDownloadStatus("Browser download start ho gaya — server copy delete ho gayi", 100);
+    elements.download.disabled = false;
+    elements.download.querySelector("span").textContent = "Download another";
+    track("direct_download_sent", { platform: state.info?.platform || "unknown", mode });
   } catch (error) {
     showError(elements.downloadError, error.message || "Download complete nahi hua.");
     elements.jobMessage.textContent = "Download failed";

@@ -4,6 +4,8 @@ import asyncio
 import ipaddress
 import logging
 import mimetypes
+import shutil
+import tempfile
 from contextlib import asynccontextmanager, suppress
 from pathlib import Path
 
@@ -13,13 +15,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, PlainTextResponse, Response as FastAPIResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.background import BackgroundTask
 
 from app.config import BASE_DIR, settings
-from app.models import AnalyzeRequest, DownloadRequest, JobCreated, JobStatus, MediaInfo
+from app.models import AnalyzeRequest, DownloadRequest, MediaInfo
 from app.security import UnsafeUrlError, validate_public_url
 from app.seo import build_ads_txt, build_robots, build_sitemap, render_page
 from app.services.downloader import MediaDownloader, MediaExtractionError
-from app.services.jobs import JobManager, QueueFullError
 from app.services.rate_limit import RateLimitExceeded, SlidingWindowRateLimiter
 
 
@@ -30,26 +32,33 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 downloader = MediaDownloader(settings)
-jobs = JobManager(settings, downloader)
 rate_limiter = SlidingWindowRateLimiter(window_seconds=900)
 analyze_slots = asyncio.Semaphore(settings.max_workers * 2)
+download_slots = asyncio.Semaphore(settings.max_workers)
 
 
 async def cleanup_loop() -> None:
     while True:
         await asyncio.sleep(300)
-        await asyncio.to_thread(jobs.cleanup)
         rate_limiter.prune()
+
+
+def purge_abandoned_temp_files() -> None:
+    """Remove only request folders created by this app after an interrupted process."""
+    settings.temp_dir.mkdir(parents=True, exist_ok=True)
+    for child in settings.temp_dir.iterdir():
+        if child.is_dir() and child.name.startswith("request-"):
+            shutil.rmtree(child, ignore_errors=True)
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    await asyncio.to_thread(purge_abandoned_temp_files)
     task = asyncio.create_task(cleanup_loop())
     yield
     task.cancel()
     with suppress(asyncio.CancelledError):
         await task
-    jobs.shutdown()
 
 
 app = FastAPI(
@@ -69,6 +78,7 @@ if settings.allowed_origins:
         allow_credentials=False,
         allow_methods=["GET", "POST"],
         allow_headers=["Content-Type"],
+        expose_headers=["Content-Disposition", "Content-Length"],
         max_age=600,
     )
 
@@ -195,45 +205,63 @@ async def analyze_media(payload: AnalyzeRequest, request: Request) -> MediaInfo:
         raise HTTPException(status_code=504, detail="Link analysis timed out. Dobara try karein.") from None
 
 
-@app.post("/api/download", response_model=JobCreated, status_code=202)
-async def start_download(payload: DownloadRequest, request: Request) -> JobCreated:
+@app.post("/api/download")
+async def direct_download(payload: DownloadRequest, request: Request) -> FileResponse:
+    """Prepare one permitted file, send it directly, then remove all temporary bytes."""
     enforce_rate_limit(request, "download", settings.download_limit)
     try:
         safe_url = validate_public_url(str(payload.url))
-        job_id = jobs.create(url=safe_url, mode=payload.mode, format_id=payload.format_id)
     except UnsafeUrlError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from None
-    except QueueFullError:
+
+    request_dir = Path(tempfile.mkdtemp(prefix="request-", dir=settings.temp_dir)).resolve()
+
+    def progress_hook(data: dict) -> None:
+        downloaded = data.get("downloaded_bytes") or 0
+        if downloaded > settings.max_download_bytes:
+            raise MediaExtractionError("Downloaded file exceeds the configured size limit.")
+
+    async def prepare_file() -> Path:
+        async with download_slots:
+            return await asyncio.to_thread(
+                downloader.download,
+                url=safe_url,
+                mode=payload.mode,
+                format_id=payload.format_id,
+                temp_dir=request_dir,
+                progress_hook=progress_hook,
+                postprocessor_hook=lambda _data: None,
+            )
+    preparation = asyncio.create_task(prepare_file())
+    try:
+        file_path = await asyncio.shield(preparation)
+    except asyncio.CancelledError:
+        # A client can disconnect while yt-dlp is still finishing in its worker
+        # thread. Keep that task alive and delete its private directory as soon
+        # as the worker exits; the startup purge is the final crash-safe guard.
+        preparation.add_done_callback(
+            lambda _task: shutil.rmtree(request_dir, ignore_errors=True)
+        )
+        raise
+    except UnsafeUrlError as exc:
+        shutil.rmtree(request_dir, ignore_errors=True)
+        raise HTTPException(status_code=400, detail=str(exc)) from None
+    except MediaExtractionError as exc:
+        shutil.rmtree(request_dir, ignore_errors=True)
+        raise HTTPException(status_code=422, detail=str(exc)) from None
+    except Exception:
+        shutil.rmtree(request_dir, ignore_errors=True)
+        logger.exception("Direct media preparation failed")
         raise HTTPException(
-            status_code=503,
-            detail="Server queue busy hai. Kuch minute baad try karein.",
-            headers={"Retry-After": "60"},
+            status_code=500,
+            detail="File prepare nahi hui. Thodi der baad dobara try karein.",
         ) from None
-    return JobCreated(job_id=job_id, status_url=f"/api/jobs/{job_id}")
 
+    if file_path.parent != request_dir or not file_path.is_file():
+        shutil.rmtree(request_dir, ignore_errors=True)
+        logger.warning("Rejected invalid direct-download output path")
+        raise HTTPException(status_code=500, detail="Prepared file path was rejected")
 
-@app.get("/api/jobs/{job_id}", response_model=JobStatus)
-async def job_status(job_id: str) -> JobStatus:
-    if len(job_id) > 64:
-        raise HTTPException(status_code=404, detail="Job not found")
-    result = jobs.public_status(job_id)
-    if not result:
-        raise HTTPException(status_code=404, detail="Job not found or expired")
-    return result
-
-
-@app.get("/api/jobs/{job_id}/file")
-async def download_file(job_id: str):
-    if len(job_id) > 64:
-        raise HTTPException(status_code=404, detail="File not found")
-    job = jobs.get(job_id)
-    if not job or job.status != "ready" or not job.file_path:
-        raise HTTPException(status_code=404, detail="File not found or expired")
-    file_path = job.file_path.resolve()
-    expected_parent = (settings.data_dir / job_id).resolve()
-    if file_path.parent != expected_parent or not file_path.is_file():
-        logger.warning("Rejected invalid output path for job %s", job_id)
-        raise HTTPException(status_code=404, detail="File not found or expired")
     media_type = mimetypes.guess_type(file_path.name)[0] or "application/octet-stream"
     return FileResponse(
         path=file_path,
@@ -241,6 +269,7 @@ async def download_file(job_id: str):
         filename=file_path.name,
         content_disposition_type="attachment",
         headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"},
+        background=BackgroundTask(shutil.rmtree, request_dir, ignore_errors=True),
     )
 
 

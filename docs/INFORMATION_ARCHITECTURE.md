@@ -8,4 +8,4 @@
 | Terms | Responsible-use contract | Home, privacy, copyright |
 | Copyright | Notice route | Home, privacy, terms |
 
-All public pages are reachable without JavaScript and within two internal clicks of the home page. API, health and job URLs are excluded from indexing.
+All public pages are reachable without JavaScript and within two internal clicks of the home page. API and health URLs are excluded from indexing.
